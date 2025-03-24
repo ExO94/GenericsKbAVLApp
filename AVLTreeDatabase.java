@@ -1,7 +1,7 @@
 /*
   Student Number: FRTETH003
-  Name : Ethan Fortuin
-  Date : 23/03/25
+  Name: Ethan Fortuin
+  Date: 23/03/25
 */
 
 import java.io.BufferedReader;
