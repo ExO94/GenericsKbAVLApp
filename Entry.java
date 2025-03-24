@@ -9,16 +9,11 @@
  * Each entry contains a term, a tree, and a confidence value.
  * Entries are comparable based on their terms.
  */
-class Entry implements Comparable<Entry>
+public class Entry implements Comparable<Entry>
 {
-    /** The term or key of this entry. */
-    String term;
-
-    /** The tree associated with this entry. */
-    String tree;
-
-    /** The confidence value associated with this entry. */
-    double confidence;
+    public String term;
+    public String tree;
+    public double confidence;
 
     /**
      * Constructs a new Entry with the specified term, tree, and confidence.

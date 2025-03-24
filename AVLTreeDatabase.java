@@ -1,7 +1,7 @@
 /*
   Student Number: FRTETH003
   Name : Ethan Fortuin
-  Date : 16/03/25
+  Date : 23/03/25
  */
 
 import java.io.BufferedReader;
@@ -14,7 +14,8 @@ import java.io.IOException;
  *
  * @param <dataType> The type of data stored in the tree, must be Comparable
  */
-public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
+public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
+
 {
     public String filePath;
     public BTNode<dataType> root;
@@ -26,8 +27,9 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
      */
     public AVLTreeDatabase(String filePath)
     {
-        this.filePath = filePath;
         root = null;
+        this.filePath = filePath;
+        this.readFile();
     }
 
     /**
