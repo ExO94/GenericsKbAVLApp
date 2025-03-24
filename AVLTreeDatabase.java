@@ -2,7 +2,7 @@
   Student Number: FRTETH003
   Name : Ethan Fortuin
   Date : 23/03/25
- */
+*/
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,11 +14,11 @@ import java.io.IOException;
  *
  * @param <dataType> The type of data stored in the tree, must be Comparable
  */
-public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
-
+public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
 {
     public String filePath;
     public BTNode<dataType> root;
+    public int comparisonCount = 0;
 
     /**
      * Constructs an AVLTreeDatabase with the specified file path.
@@ -27,9 +27,9 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
      */
     public AVLTreeDatabase(String filePath)
     {
-        root = null;
         this.filePath = filePath;
-        this.readFile();
+        this.root = null;
+        readFile();
     }
 
     /**
@@ -84,17 +84,17 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
     public BTNode<dataType> insert(dataType d, BTNode<dataType> node)
     {
         if (node == null)
-        {
-            return new BTNode<>(d, null, null);
-        }
-        if (d.compareTo(node.data) <= 0)
-        {
+            return new BTNode<dataType>(d, null, null);
+
+        int compareResult;
+        comparisonCount++;
+        compareResult = d.compareTo(node.data);
+
+        if (compareResult < 0)
             node.left = insert(d, node.left);
-        }
-        else
-        {
+        else if (compareResult > 0)
             node.right = insert(d, node.right);
-        }
+
         return balance(node);
     }
 
@@ -107,19 +107,21 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
     public BTNode<dataType> balance(BTNode<dataType> node)
     {
         fixHeight(node);
-        int balanceFactor = balanceFactor(node);
-        if (balanceFactor == 2)
+        int bFactor = balanceFactor(node);
+
+        if (bFactor == 2)
         {
             if (balanceFactor(node.right) < 0)
                 node.right = rotateRight(node.right);
             return rotateLeft(node);
         }
-        if (balanceFactor == -2)
+        if (bFactor == -2)
         {
             if (balanceFactor(node.left) > 0)
                 node.left = rotateLeft(node.left);
             return rotateRight(node);
         }
+
         return node;
     }
 
@@ -141,7 +143,9 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
      */
     public void fixHeight(BTNode<dataType> node)
     {
-        node.height = Math.max(height(node.left), height(node.right)) + 1;
+        int heightLeft = height(node.left);
+        int heightRight = height(node.right);
+        node.height = (heightLeft > heightRight ? heightLeft : heightRight) + 1;
     }
 
     /**
@@ -152,11 +156,7 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
      */
     public int height(BTNode<dataType> node)
     {
-        if (node != null)
-        {
-            return node.height;
-        }
-        return -1;
+        return node == null ? -1 : node.height;
     }
 
     /**
@@ -167,7 +167,7 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
      */
     public Entry find(String term)
     {
-        return find(term, (BTNode<Entry>)root);
+        return find(term, (BTNode<Entry>) root);
     }
 
     /**
@@ -180,23 +180,18 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
     private Entry find(String term, BTNode<Entry> node)
     {
         if (node == null)
-        {
             return null;
-        }
 
-        int comparison = term.compareTo(node.data.term);
-        if (comparison == 0)
-        {
-            return node.data;
-        }
-        else if (comparison < 0)
-        {
+        int compareResult;
+        comparisonCount++;
+        compareResult = term.compareTo(node.data.term);
+
+        if (compareResult < 0)
             return find(term, node.left);
-        }
-        else
-        {
+        else if (compareResult > 0)
             return find(term, node.right);
-        }
+        else
+            return node.data;
     }
 
     /**
@@ -204,9 +199,11 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
      */
     public void readFile()
     {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath)))
+        try
         {
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
             String line;
+
             while ((line = reader.readLine()) != null)
             {
                 String[] parts = line.split("\t");
@@ -218,11 +215,23 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>3
                     insert((dataType) new Entry(term, tree, confidence));
                 }
             }
+
+            reader.close();
         }
         catch (IOException e)
         {
             System.err.println("Error reading file: " + e.getMessage());
         }
+    }
+
+    public int getComparisonCount()
+    {
+        return comparisonCount;
+    }
+
+    public void printInstrumentationResults()
+    {
+        System.out.println("Key comparison operations: " + comparisonCount);
     }
 }
 
@@ -245,11 +254,11 @@ class BTNode<dataType>
      * @param l The left child node
      * @param r The right child node
      */
-    public BTNode(dataType d, BTNode<dataType> l, BTNode<dataType> r)
+    BTNode(dataType d, BTNode<dataType> l, BTNode<dataType> r)
     {
         data = d;
         left = l;
         right = r;
-        height = 1;
+        height = 0;
     }
 }

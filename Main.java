@@ -1,15 +1,15 @@
 /*
-    Student Number: FRTETH003
-    Name: Ethan Fortuin
-    Date: 24/03/25
- */
+  Student Number: FRTETH003
+  Name: Ethan Fortuin
+  Date: 24/03/25
+*/
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class AVLTreeMain
+public class Main
 {
     public static final String filePath = "GenericsKB.txt";
 
@@ -52,7 +52,7 @@ public class AVLTreeMain
                     break;
                 case 3:
                     exit = true;
-                    System.out.println("Exiting program. Goodbye!");
+                    System.out.println("Exiting program. Goodbye!\n");
                     break;
                 default:
                     System.out.println("Invalid choice. Please enter a number between 1 and 3.");
@@ -68,11 +68,13 @@ public class AVLTreeMain
      * @param scanner Scanner for user input
      * @param database The AVL tree database to query
      */
-    private static void queryTermsFromFile(Scanner scanner, AVLTreeDatabase<Entry> database) {
+    private static void queryTermsFromFile(Scanner scanner, AVLTreeDatabase<Entry> database)
+    {
         System.out.print("Enter the name of the text file containing terms: ");
         String queryFileName = scanner.nextLine().trim();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName)))
+        {
             String term;
             int count = 0;
             int found = 0;
@@ -80,18 +82,23 @@ public class AVLTreeMain
             System.out.println("\nResults:");
             System.out.println("========");
 
-            while ((term = reader.readLine()) != null) {
+            while ((term = reader.readLine()) != null)
+            {
                 count++;
                 term = term.trim();
-                if (!term.isEmpty()) {
+                if (!term.isEmpty())
+                {
                     Entry result = database.find(term);
-                    if (result != null) {
+                    if (result != null)
+                    {
                         found++;
                         System.out.println("Term: " + result.term);
                         System.out.println("Tree: " + result.tree);
                         System.out.println("Confidence: (" + result.confidence+")");
                         System.out.println();
-                    } else {
+                    }
+                    else
+                    {
                         System.out.println("Term not found: " + term);
                         System.out.println();
                     }
@@ -99,7 +106,10 @@ public class AVLTreeMain
             }
 
             System.out.println("Summary: Found " + found + " out of " + count + " terms.");
-        } catch (IOException e) {
+            database.printInstrumentationResults();
+        }
+        catch (IOException e)
+        {
             System.out.println("Error reading file: " + e.getMessage());
             System.out.println("Make sure the file exists and is accessible.");
         }
@@ -111,18 +121,22 @@ public class AVLTreeMain
      * @param scanner Scanner for user input
      * @param database The AVL tree database to query
      */
-    private static void querySingleTerm(Scanner scanner, AVLTreeDatabase<Entry> database) {
+    private static void querySingleTerm(Scanner scanner, AVLTreeDatabase<Entry> database)
+    {
         System.out.print("Enter a term to search for: ");
         String term = scanner.nextLine().trim();
 
         Entry result = database.find(term);
-        if (result != null) {
+        if (result != null)
+        {
             System.out.println("\nResult:");
             System.out.println("========");
             System.out.println("Term: " + result.term);
             System.out.println("Tree: " + result.tree);
             System.out.println("Confidence:  (" + result.confidence+")");
-        } else {
+        }
+        else
+        {
             System.out.println("Term not found: " + term);
         }
     }

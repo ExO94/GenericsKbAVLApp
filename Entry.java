@@ -1,8 +1,8 @@
 /*
   Student Number: FRTETH003
   Name : Ethan Fortuin
-  Date : 16/03/25
- */
+  Date : 24/03/25
+*/
 
 /**
  * Represents an entry in the AVL tree database.
