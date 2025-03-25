@@ -15,47 +15,39 @@ public class Main
 
     public static void main(String[] args)
     {
-        AVLTreeDatabase<Entry> database = new AVLTreeDatabase<>(filePath);
-
         Scanner scanner = new Scanner(System.in);
+        AVLTreeDatabase<Entry> database = new AVLTreeDatabase<>(filePath);
+        database.readFile();
+
         boolean exit = false;
+        while (!exit)
+        {
+            System.out.println("\nSelect an option:");
+            System.out.println("1. Query a single term");
+            System.out.println("2. Query multiple terms from a file");
+            System.out.println("3. Display comparison statistics");
+            System.out.println("4. Exit");
+            System.out.print("Enter your choice: ");
 
-        System.out.println("GenericsKbAVLApp");
-        System.out.println("================");
-
-
-        while (!exit) {
-            System.out.println("\nOptions:");
-            System.out.println("1. Query terms from a file");
-            System.out.println("2. Query a single term");
-            System.out.println("3. Exit");
-            System.out.print("Enter your choice (1-3): ");
-
-            int choice;
-            try
-            {
-                choice = Integer.parseInt(scanner.nextLine().trim());
-            }
-            catch (NumberFormatException e)
-            {
-                System.out.println("Invalid input. Please enter a valid number.");
-                continue;
-            }
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
             switch (choice)
             {
                 case 1:
-                    queryTermsFromFile(scanner, database);
-                    break;
-                case 2:
                     querySingleTerm(scanner, database);
                     break;
+                case 2:
+                    queryTermsFromFile(scanner, database);
+                    break;
                 case 3:
+                    database.printInstrumentation();
+                    break;
+                case 4:
                     exit = true;
-                    System.out.println("Exiting program. Goodbye!\n");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please enter a number between 1 and 3.");
+                    System.out.println("Invalid choice. Please try again.");
             }
         }
 
@@ -70,48 +62,41 @@ public class Main
      */
     private static void queryTermsFromFile(Scanner scanner, AVLTreeDatabase<Entry> database)
     {
-        System.out.print("Enter the name of the text file containing terms: ");
-        String queryFileName = scanner.nextLine().trim();
+        System.out.print("Enter the path to the file containing terms: ");
+        String queryFilePath = scanner.nextLine();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(queryFileName)))
+        try (BufferedReader br = new BufferedReader(new FileReader(queryFilePath)))
         {
-            String term;
-            int count = 0;
+            String line;
             int found = 0;
+            int notFound = 0;
 
-            System.out.println("\nResults:");
-            System.out.println("========");
-
-            while ((term = reader.readLine()) != null)
+            while ((line = br.readLine()) != null)
             {
-                count++;
-                term = term.trim();
-                if (!term.isEmpty())
+                String term = line.trim();
+                Entry entry = database.find(term);
+
+                if (entry != null)
                 {
-                    Entry result = database.find(term);
-                    if (result != null)
-                    {
-                        found++;
-                        System.out.println("Term: " + result.term);
-                        System.out.println("Tree: " + result.tree);
-                        System.out.println("Confidence: (" + result.confidence+")");
-                        System.out.println();
-                    }
-                    else
-                    {
-                        System.out.println("Term not found: " + term);
-                        System.out.println();
-                    }
+                    System.out.println("Found: " + entry);
+                    found++;
+                }
+                else
+                {
+                    System.out.println("Term not found: " + term);
+                    notFound++;
                 }
             }
 
-            System.out.println("Summary: Found " + found + " out of " + count + " terms.");
-            database.printInstrumentationResults();
+            System.out.println("\nSearch results:");
+            System.out.println("Total terms searched: " + (found + notFound));
+            System.out.println("Terms found: " + found);
+            System.out.println("Terms not found: " + notFound);
+
         }
         catch (IOException e)
         {
             System.out.println("Error reading file: " + e.getMessage());
-            System.out.println("Make sure the file exists and is accessible.");
         }
     }
 
@@ -124,20 +109,49 @@ public class Main
     private static void querySingleTerm(Scanner scanner, AVLTreeDatabase<Entry> database)
     {
         System.out.print("Enter a term to search for: ");
-        String term = scanner.nextLine().trim();
+        String term = scanner.nextLine();
 
-        Entry result = database.find(term);
-        if (result != null)
+        Entry entry = database.find(term);
+
+        if (entry != null)
         {
-            System.out.println("\nResult:");
-            System.out.println("========");
-            System.out.println("Term: " + result.term);
-            System.out.println("Tree: " + result.tree);
-            System.out.println("Confidence:  (" + result.confidence+")");
+            System.out.println("Found: " + entry);
         }
         else
         {
             System.out.println("Term not found: " + term);
+        }
+    }
+
+    /**
+     * Randomly rearranges lines within a text file.
+     *
+     * @param inputFileName The file path of the original file.
+     * @param outputFileName The file path for the randomized output file.
+     * @throws IOException If an I/O error occurs.
+     */
+    public static void randomizeFileLines(String inputFileName, String outputFileName) throws IOException
+    {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFileName)))
+        {
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                lines.add(line);
+            }
+        }
+
+        java.util.Collections.shuffle(lines);
+
+        try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(outputFileName)))
+        {
+            for (String line : lines)
+            {
+                writer.write(line);
+                writer.newLine();
+            }
         }
     }
 }

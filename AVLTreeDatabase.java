@@ -18,7 +18,8 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
 {
     public String filePath;
     public BTNode<dataType> root;
-    public int comparisonCount = 0;
+    public int searchComparisonCount = 0;  // Counter for search comparisons
+    public int insertComparisonCount = 0;  // Counter for insert comparisons
 
     /**
      * Constructs an AVLTreeDatabase with the specified file path.
@@ -28,8 +29,7 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
     public AVLTreeDatabase(String filePath)
     {
         this.filePath = filePath;
-        this.root = null;
-        readFile();
+        root = null;
     }
 
     /**
@@ -84,16 +84,19 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
     public BTNode<dataType> insert(dataType d, BTNode<dataType> node)
     {
         if (node == null)
-            return new BTNode<dataType>(d, null, null);
+            return new BTNode<dataType>(d);
 
-        int compareResult;
-        comparisonCount++;
-        compareResult = d.compareTo(node.data);
-
-        if (compareResult < 0)
+        insertComparisonCount++; // Increment insert comparisons counter
+        if (d.compareTo(node.data) < 0)
             node.left = insert(d, node.left);
-        else if (compareResult > 0)
-            node.right = insert(d, node.right);
+        else
+        {
+            insertComparisonCount++; // Increment insert comparisons counter
+            if (d.compareTo(node.data) > 0)
+                node.right = insert(d, node.right);
+            else
+                return node;
+        }
 
         return balance(node);
     }
@@ -107,15 +110,15 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
     public BTNode<dataType> balance(BTNode<dataType> node)
     {
         fixHeight(node);
-        int bFactor = balanceFactor(node);
 
-        if (bFactor == 2)
+        if (balanceFactor(node) == 2)
         {
             if (balanceFactor(node.right) < 0)
                 node.right = rotateRight(node.right);
             return rotateLeft(node);
         }
-        if (bFactor == -2)
+
+        if (balanceFactor(node) == -2)
         {
             if (balanceFactor(node.left) > 0)
                 node.left = rotateLeft(node.left);
@@ -143,9 +146,32 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
      */
     public void fixHeight(BTNode<dataType> node)
     {
-        int heightLeft = height(node.left);
-        int heightRight = height(node.right);
-        node.height = (heightLeft > heightRight ? heightLeft : heightRight) + 1;
+        int hl = height(node.left);
+        int hr = height(node.right);
+        node.height = (hl > hr ? hl : hr) + 1;
+    }
+
+    public void readFileRange(int start, int end)
+    {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            int count = 0;
+
+            while ((line = br.readLine()) != null && count < end) {
+                count++;
+                if (count >= start) {
+                    String[] parts = line.split("\t");
+                    if (parts.length >= 3) {
+                        String term = parts[0];
+                        String tree = parts[1];
+                        double confidence = Double.parseDouble(parts[2]);
+                        insert((dataType) new Entry(term, tree, confidence));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -177,18 +203,17 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
      * @param node The current node in the recursion
      * @return The Entry if found, null otherwise
      */
-    private Entry find(String term, BTNode<Entry> node)
+    public Entry find(String term, BTNode<Entry> node)
     {
         if (node == null)
             return null;
 
-        int compareResult;
-        comparisonCount++;
-        compareResult = term.compareTo(node.data.term);
+        searchComparisonCount++; // Increment search comparisons counter
+        int cmp = term.compareTo(node.data.term);
 
-        if (compareResult < 0)
+        if (cmp < 0)
             return find(term, node.left);
-        else if (compareResult > 0)
+        else if (cmp > 0)
             return find(term, node.right);
         else
             return node.data;
@@ -199,39 +224,38 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
      */
     public void readFile()
     {
-        try
-        {
-            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
 
-            while ((line = reader.readLine()) != null)
-            {
+            while ((line = br.readLine()) != null) {
                 String[] parts = line.split("\t");
-                if (parts.length == 3)
-                {
+                if (parts.length >= 3) {
                     String term = parts[0];
                     String tree = parts[1];
                     double confidence = Double.parseDouble(parts[2]);
                     insert((dataType) new Entry(term, tree, confidence));
                 }
             }
-
-            reader.close();
-        }
-        catch (IOException e)
-        {
-            System.err.println("Error reading file: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
+    /**
+     * Returns the total number of comparisons made during operations
+     */
     public int getComparisonCount()
     {
-        return comparisonCount;
+        return searchComparisonCount + insertComparisonCount;
     }
 
-    public void printInstrumentationResults()
+    /**
+     * Prints instrumentation data about the tree operations
+     */
+    public void printInstrumentation()
     {
-        System.out.println("Key comparison operations: " + comparisonCount);
+        System.out.println("\nKey comparisons by search: " + searchComparisonCount);
+        System.out.println("Key comparisons by insert: " + insertComparisonCount);
     }
 }
 
@@ -243,22 +267,17 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
 class BTNode<dataType>
 {
     dataType data;
-    BTNode<dataType> left;
-    BTNode<dataType> right;
+    BTNode<dataType> left, right;
     int height;
 
     /**
-     * Constructs a BTNode with the given data and child nodes.
+     * Constructs a new node with the given data.
      *
-     * @param d The data to store in this node
-     * @param l The left child node
-     * @param r The right child node
+     * @param d The data to store in the node
      */
-    BTNode(dataType d, BTNode<dataType> l, BTNode<dataType> r)
+    public BTNode(dataType d)
     {
         data = d;
-        left = l;
-        right = r;
         height = 0;
     }
 }

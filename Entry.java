@@ -52,4 +52,5 @@ public class Entry implements Comparable<Entry>
     {
         return term + ": " + tree + " (" + confidence + ")";
     }
+
 }
