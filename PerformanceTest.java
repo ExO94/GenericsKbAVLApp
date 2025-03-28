@@ -16,7 +16,7 @@ public class PerformanceTest
 {
     private static final String FULL_DATA_FILE = "GenericsKB.txt";
     private static final String QUERY_FILE = "GenericsKB-queries.txt";
-    private static final int[] DATASET_SIZES = {5, 50, 500, 5000, 50000};
+    private static final int[] DATASET_SIZES = {5, 25, 50, 250, 500,1500,3500, 5000,7500, 50000};
 
     public static void main(String[] args)
     {
