@@ -22,7 +22,9 @@ public class Main
         boolean exit = false;
         while (!exit)
         {
-            System.out.println("\nSelect an option:");
+            System.out.println("\n-- Generics Knowledge Base Query Tool --");
+            System.out.println("========================================");
+            System.out.println("Select an option:");
             System.out.println("1. Query a single term");
             System.out.println("2. Query multiple terms from a file");
             System.out.println("3. Display comparison statistics");
@@ -115,43 +117,11 @@ public class Main
 
         if (entry != null)
         {
-            System.out.println("Found: " + entry);
+            System.out.println("\nFound: " + entry);
         }
         else
         {
             System.out.println("Term not found: " + term);
-        }
-    }
-
-    /**
-     * Randomly rearranges lines within a text file.
-     *
-     * @param inputFileName The file path of the original file.
-     * @param outputFileName The file path for the randomized output file.
-     * @throws IOException If an I/O error occurs.
-     */
-    public static void randomizeFileLines(String inputFileName, String outputFileName) throws IOException
-    {
-        java.util.List<String> lines = new java.util.ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFileName)))
-        {
-            String line;
-            while ((line = reader.readLine()) != null)
-            {
-                lines.add(line);
-            }
-        }
-
-        java.util.Collections.shuffle(lines);
-
-        try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(outputFileName)))
-        {
-            for (String line : lines)
-            {
-                writer.write(line);
-                writer.newLine();
-            }
         }
     }
 }

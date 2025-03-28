@@ -18,8 +18,8 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
 {
     public String filePath;
     public BTNode<dataType> root;
-    public int searchComparisonCount = 0;  // Counter for search comparisons
-    public int insertComparisonCount = 0;  // Counter for insert comparisons
+    public int searchComparisonCount = 0;
+    public int insertComparisonCount = 0;
 
     /**
      * Constructs an AVLTreeDatabase with the specified file path.
@@ -86,12 +86,12 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
         if (node == null)
             return new BTNode<dataType>(d);
 
-        insertComparisonCount++; // Increment insert comparisons counter
+        insertComparisonCount++;
         if (d.compareTo(node.data) < 0)
             node.left = insert(d, node.left);
         else
         {
-            insertComparisonCount++; // Increment insert comparisons counter
+            insertComparisonCount++;
             if (d.compareTo(node.data) > 0)
                 node.right = insert(d, node.right);
             else
@@ -239,6 +239,46 @@ public class AVLTreeDatabase<dataType extends Comparable<? super dataType>>
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Resets the comparison counters for both search and insert operations.
+     */
+    public void resetCounters()
+    {
+        searchComparisonCount = 0;
+        insertComparisonCount = 0;
+    }
+
+    /**
+     * Gets the number of comparisons made during the last insert operation.
+     *
+     * @return The count of insert comparisons
+     */
+    public int getInsertComparisons()
+    {
+        return insertComparisonCount;
+    }
+
+    /**
+     * Gets the number of comparisons made during the last search operation.
+     *
+     * @return The count of search comparisons
+     */
+    public int getSearchComparisons()
+    {
+        return searchComparisonCount;
+    }
+
+    /**
+     * Searches for an entry in the tree.
+     *
+     * @param entry The entry to search for
+     * @return The found entry, or null if not found
+     */
+    public Entry search(Entry entry)
+    {
+        return find(entry.term);
     }
 
     /**
